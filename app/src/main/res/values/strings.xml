@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">colorPictures</string>
+    <string name="imagen_camara">Imagen camara</string>
+    <string name="imagen_video">Imagen video</string>
+    <string name="galeria_imagenes">galeria imagenes</string>
+    <string name="galeria_video">galeria video</string>
 </resources>

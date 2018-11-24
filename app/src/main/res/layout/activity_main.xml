@@ -1,18 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-</android.support.constraint.ConstraintLayout>
+        <ImageView
+            android:id="@+id/btnCamera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/imagen_camara"
+            android:scaleType="fitCenter"
+            android:onClick="tomarFoto"
+            app:srcCompat="@drawable/ic_photo_camera_black_48dp" />
+
+        <ImageView
+            android:id="@+id/btnVideoCamera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/imagen_video"
+            android:scaleType="fitCenter"
+            android:onClick="tomarVideo"
+            app:srcCompat="@drawable/ic_videocam_black_48dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btnCameraGallery"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/galeria_imagenes"
+            android:scaleType="fitCenter"
+            android:onClick="verGaleriaFotos"
+            app:srcCompat="@drawable/ic_photo_library_black_48dp" />
+
+        <ImageView
+            android:id="@+id/btnVideoCameraGallery"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/galeria_video"
+            android:scaleType="fitCenter"
+            android:onClick="verGaleriaVideos"
+            app:srcCompat="@drawable/ic_video_library_black_48dp" />
+    </LinearLayout>
+
+</LinearLayout>
