@@ -2,10 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.johanmorales.colorpictures">
 
-    <!-- Especifica que usa hardware-->
-    <uses-feature android:name="android.hardware.camera"
+    <!-- Especifica que usa hardware -->
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
-    <!-- permiso para escribir el almacenamiento externo-->
+    <!-- permiso para escribir el almacenamiento externo -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -22,6 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ImageActivity"></activity>
     </application>
 
 </manifest>

@@ -2,6 +2,7 @@ package com.example.johanmorales.colorpictures;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -51,7 +52,17 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode == RESULT_OK){
             //manipular informacion
 
-
+            if(requestCode == PETICION_FOTO){
+                //ver la foto
+                //se pasa a la otra activity con un nuevo intent que pasa de esta activity Main a
+                //la actividad ImageActivity
+                Intent verFoto = new Intent(this, ImageActivity.class);
+                //a este intent se le agregan los datos que se acaban de capturar
+                //en este caso lo que se captura el la Uri de la imagen recien tomada
+                verFoto.setData(mediaUri);
+                //se inicializa el intent inicializado
+                startActivity(verFoto);
+            }
 
         }else{
             //algo salio mal y toca notificar al usuario
@@ -94,6 +105,9 @@ public class MainActivity extends AppCompatActivity {
             //se crea el archivo
             archivo = File.createTempFile(nombreArchivo,".jpg",directorioAlmacenamiento);
 
+            //esta linea refresca el contenido de la galeria para que lo podamos ver
+            MediaScannerConnection.scanFile(this, new String[]{archivo.getPath()}, new String [] {"image/jpeg", "video/mp4"}, null);
+
             Toast.makeText(this, "Archivo guardado en: "+archivo.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
             return Uri.fromFile(archivo);
@@ -108,6 +122,9 @@ public class MainActivity extends AppCompatActivity {
             //se crea el archivo
             archivo = File.createTempFile(nombreArchivo,".mp4",directorioAlmacenamiento);
 
+            //esta linea refresca el contenido de la galeria para que lo podamos ver
+            MediaScannerConnection.scanFile(this, new String[]{archivo.getPath()}, new String [] {"image/jpeg", "video/mp4"}, null);
+
             Toast.makeText(this, "Archivo guardado en: "+archivo.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
             return Uri.fromFile(archivo);
@@ -120,6 +137,9 @@ public class MainActivity extends AppCompatActivity {
 
     /*
     * Metodos on click de la view
+    *
+    * se utiliza la libreria para las imagenes de github
+    * https://github.com/square/picasso
     * */
     public void tomarFoto(View view) {
         Toast.makeText(this, "Ejecutando método tomarFoto", Toast.LENGTH_LONG).show();
@@ -144,10 +164,8 @@ public class MainActivity extends AppCompatActivity {
             
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
-
-
-
 
     }
 
