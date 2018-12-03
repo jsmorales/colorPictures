@@ -110,6 +110,11 @@ public class MainActivity extends AppCompatActivity {
     //Este metodo regresa el path al cual el archivo va a quedar almacenado
     private Uri crearArchivo(int tipoMedio) throws IOException {
 
+        //en caso de que no halla almacenamiento disponible no se ejecuta este metodo
+        if(!almacenamientoExternoDisponible()){
+            return null;
+        }
+
         @SuppressLint("SimpleDateFormat") String timeStamp = new SimpleDateFormat(YYYY_MM_DD_MM_SS).format(new Date());
         String nombreArchivo;
 
@@ -166,83 +171,94 @@ public class MainActivity extends AppCompatActivity {
     * https://github.com/square/picasso
     * */
     public void tomarFoto(View view) {
+
         Toast.makeText(this, "Ejecutando método tomarFoto", Toast.LENGTH_LONG).show();
 
-        try {
-            mediaUri = crearArchivo(MEDIA_FOTO);
-            
-            if(mediaUri == null){
-                Toast.makeText(this, "Por favor revisar almacenamiento.", Toast.LENGTH_SHORT).show();
-            }else{
-
-                //se crea el intent que tiene por parametro tomar imagen
-                Intent intentFoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                //en el intent manda el extra con el path del archivo
-                intentFoto.putExtra(MediaStore.EXTRA_OUTPUT, mediaUri);
-
-                //se ejecuta startActivityForResult parametros intent de la foto y el numero de peticion que esta guardado en la constante
-                //este metodo me permite guardar el resultado para despues hacer algo con el
-                startActivityForResult(intentFoto,PETICION_FOTO);
-            }
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        capturar(PETICION_FOTO,MEDIA_FOTO);
 
     }
 
     public void tomarVideo(View view) {
+
         Toast.makeText(this, "Ejecutando método tomarVideo", Toast.LENGTH_LONG).show();
 
+        capturar(PETICION_VIDEO,MEDIA_VIDEO);
+    }
+
+    public void capturar(int peticionArchivo, int tipoArchivo){
+
         try {
-            mediaUri = crearArchivo(MEDIA_VIDEO);
+            mediaUri = crearArchivo(tipoArchivo);
 
             if(mediaUri == null){
                 Toast.makeText(this, "Por favor revisar almacenamiento.", Toast.LENGTH_LONG).show();
             }else{
 
-                //se crea el intent que tiene por parametro tomar video
-                Intent intentVideo = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-
-                //en el intent manda el extra con el path del archivo
-                intentVideo.putExtra(MediaStore.EXTRA_OUTPUT, mediaUri);
-
-                //para limitar la duracion del video se envia en el intent de la siguiente forma
-                //tambien se puede especificar la calidad del video
-                intentVideo.putExtra(MediaStore.EXTRA_DURATION_LIMIT, MAX_DURATION_VIDEO_APP);
-
-                //se ejecuta startActivityForResult parametros intent de la foto y el numero de peticion que esta guardado en la constante
-                //este metodo me permite guardar el resultado para despues hacer algo con el
-                startActivityForResult(intentVideo,PETICION_VIDEO);
+                iniciarCamara(mediaUri,peticionArchivo);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
+
+    }
+
+    public void iniciarCamara(Uri mediaUri, int tipoPeticion){
+
+        Intent intent;
+
+        if(tipoPeticion == PETICION_VIDEO){
+
+            //se crea el intent que tiene por parametro tomar video
+            intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+            //en el intent manda el extra con el path del archivo
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, mediaUri);
+            //para limitar la duracion del video se envia en el intent de la siguiente forma
+            //tambien se puede especificar la calidad del video
+            intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, MAX_DURATION_VIDEO_APP);
+            //se ejecuta startActivityForResult parametros intent de la foto y el numero de peticion que esta guardado en la constante
+            //este metodo me permite guardar el resultado para despues hacer algo con el
+            startActivityForResult(intent,tipoPeticion);
+
+        }else if(tipoPeticion == PETICION_FOTO){
+
+            //se crea el intent que tiene por parametro tomar imagen
+            intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            //en el intent manda el extra con el path del archivo
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, mediaUri);
+            //se ejecuta startActivityForResult parametros intent de la foto y el numero de peticion que esta guardado en la constante
+            //este metodo me permite guardar el resultado para despues hacer algo con el
+            startActivityForResult(intent,tipoPeticion);
+
+        }else{
+
+            Toast.makeText(this, "Se intenta inicializar la cámara de forma incorrecta.", Toast.LENGTH_LONG).show();
+
+            throw new IllegalArgumentException();
+        }
+        
     }
 
     public void verGaleriaFotos(View view) {
         Toast.makeText(this, "Ejecutando método verGaleriaFotos", Toast.LENGTH_LONG).show();
 
-        //para ver la galeria de fotos se hace con un intent
-        Intent verGaleria = new Intent(Intent.ACTION_GET_CONTENT);
-        //se dice el tipo de contenido que se va a ver con setType
-        verGaleria.setType("image/*");
-        //se inicia la activity pero por result para darle manejo en el evento de esta misma actividad
-        startActivityForResult(verGaleria, PETICION_GALERIA_FOTOS);
+        inicializarGaleria("image/*",PETICION_GALERIA_FOTOS);
     }
 
     public void verGaleriaVideos(View view) {
         Toast.makeText(this, "Ejecutando método verGaleriaVideos", Toast.LENGTH_LONG).show();
 
+        inicializarGaleria("video/*",PETICION_GALERIA_VIDEOS);
+    }
+
+    public void inicializarGaleria(String tipo, int peticion){
+
         //para ver la galeria de fotos se hace con un intent
         Intent verGaleria = new Intent(Intent.ACTION_GET_CONTENT);
         //se dice el tipo de contenido que se va a ver con setType
-        verGaleria.setType("video/*");
+        verGaleria.setType(tipo);
         //se inicia la activity pero por result para darle manejo en el evento de esta misma actividad
-        startActivityForResult(verGaleria, PETICION_GALERIA_VIDEOS);
+        startActivityForResult(verGaleria, peticion);
     }
 }
