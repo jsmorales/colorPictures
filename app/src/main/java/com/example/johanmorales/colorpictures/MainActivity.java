@@ -1,12 +1,19 @@
 package com.example.johanmorales.colorpictures;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AlertDialogLayout;
@@ -34,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int MEDIA_VIDEO = 6;
     public static final String YYYY_MM_DD_MM_SS = "yyyy-MM-DD:mm:ss";
     public static final int MAX_DURATION_VIDEO_APP = 10;
+    public static final int CAMERA_WRITE_PERMISSION = 11;
+    public static final int VIDEO_WRITE_PERMISSION = 12;
 
     private Uri mediaUri;
 
@@ -43,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //Fix error
+        //Caused by: android.os.FileUriExposedException: file:///storage/emulated/0/Pictures/... exposed beyond app through ClipData.Item.getUri()
+        StrictMode.VmPolicy.Builder newbuilder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(newbuilder.build());
     }
 
     //Metodo para manejar los resultados de actividades
@@ -90,9 +103,10 @@ public class MainActivity extends AppCompatActivity {
 
         }else{
             //algo salio mal y toca notificar al usuario
-            Toast.makeText(this, "No se pudo manejar el reseultado.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No se pudo manejar el resultado.", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     /*
     * Metodos de clase
@@ -172,15 +186,100 @@ public class MainActivity extends AppCompatActivity {
     * */
     public void tomarFoto(View view) {
 
-        Toast.makeText(this, "Ejecutando método tomarFoto", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Ejecutando método tomarFoto sobre la version sdk "+Build.VERSION.SDK_INT, Toast.LENGTH_LONG).show();
 
-        capturar(PETICION_FOTO,MEDIA_FOTO);
+        String permisoStorage = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
+        //verificar la version de android para pedir permisos en tiempo de ejecucion
+        //para la version 23 marshmallow hay que pedir permisos en tiempo de ejecución
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+
+            Toast.makeText(this, "Necesito permisos!", Toast.LENGTH_SHORT).show();
+
+            //verificar si ya tiene permiso requerido en este caso el WRITE_EXTERNAL_STORAGE que se definió en el
+            //manifest
+            if(checkSelfPermission(permisoStorage) != PackageManager.PERMISSION_GRANTED){
+                //pedir el permiso
+
+                //verificar si ya se pidio el persimo antes para informa porque
+                //se necesita en caso de que se halla denegado previamente
+                if(shouldShowRequestPermissionRationale(permisoStorage)){
+                    mostrarExplicacion(PETICION_FOTO,permisoStorage);
+                }else{
+                    //para pedir el permiso se solicita el array de strings de los permisos, con las constantes
+                    //definidas en Manifest.permission y un codigo para poderlo identificar definido por uno mismo
+                    requestPermissions(new String[]{permisoStorage}, CAMERA_WRITE_PERMISSION);
+                }
+
+            }else{
+                //ya tiene el permiso
+                capturar(PETICION_FOTO,MEDIA_FOTO);
+            }
+
+        }else{
+            capturar(PETICION_FOTO,MEDIA_FOTO);
+        }
+
+    }
+
+    private void mostrarExplicacion(final int tipoPeticion, final String permisoStorage) {
+
+        new AlertDialog.Builder(this)
+                .setTitle("Permiso de Almacenamiento")
+                .setMessage("Se necesita tu permiso para poder guardar las fotos en el dispositivo.")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @SuppressLint("NewApi")
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //pedir el permiso requerido
+
+                        if(tipoPeticion == PETICION_FOTO){
+                            requestPermissions(new String[]{permisoStorage}, CAMERA_WRITE_PERMISSION);
+                        }else if(tipoPeticion == PETICION_VIDEO){
+                            requestPermissions(new String[]{permisoStorage}, VIDEO_WRITE_PERMISSION);
+                        }else{
+                            throw new IllegalArgumentException();
+                        }
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //una lastima
+                        Toast.makeText(MainActivity.this, "Que lástima, la aplicación no se puede utilizar.", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        //este metodo se ejecuta en respuesta a lo que resulte del pedido de permisos
+
+        //requestCode es el codigo que se definio por defecto dentro de nuestra app
+        //public static final int CAMERA_WRITE_PERMISSION = 11;
+        //public static final int CAMERA_WRITE_PERMISSION = 12;
+
+        //permissions es el arreglo de perimisos solicitados
+        //grantResults devuelte entero de si se dio el permiso o no
+
+        if(requestCode == CAMERA_WRITE_PERMISSION){
+            //se debe iniciar la camara con foto
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                capturar(PETICION_FOTO,MEDIA_FOTO);
+            }
+        }else if(requestCode == VIDEO_WRITE_PERMISSION){
+            //iniciar video
+            capturar(PETICION_VIDEO,MEDIA_VIDEO);
+        }
     }
 
     public void tomarVideo(View view) {
 
-        Toast.makeText(this, "Ejecutando método tomarVideo", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Ejecutando método tomarVideo sobre la version sdk "+Build.VERSION.SDK_INT, Toast.LENGTH_LONG).show();
 
         capturar(PETICION_VIDEO,MEDIA_VIDEO);
     }
