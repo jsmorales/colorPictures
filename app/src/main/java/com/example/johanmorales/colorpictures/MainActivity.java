@@ -81,6 +81,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(verGaleriaFotos);
             }
 
+            if(requestCode == PETICION_GALERIA_VIDEOS){
+                //envia la data que toma el result a la actividad de video
+                Intent verGaleriaVideos = new Intent(this, VideoActivity.class);
+                verGaleriaVideos.setData(data.getData());
+                startActivity(verGaleriaVideos);
+            }
+
         }else{
             //algo salio mal y toca notificar al usuario
             Toast.makeText(this, "No se pudo manejar el reseultado.", Toast.LENGTH_SHORT).show();
@@ -230,5 +237,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void verGaleriaVideos(View view) {
         Toast.makeText(this, "Ejecutando método verGaleriaVideos", Toast.LENGTH_LONG).show();
+
+        //para ver la galeria de fotos se hace con un intent
+        Intent verGaleria = new Intent(Intent.ACTION_GET_CONTENT);
+        //se dice el tipo de contenido que se va a ver con setType
+        verGaleria.setType("video/*");
+        //se inicia la activity pero por result para darle manejo en el evento de esta misma actividad
+        startActivityForResult(verGaleria, PETICION_GALERIA_VIDEOS);
     }
 }
