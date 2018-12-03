@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
         new AlertDialog.Builder(this)
                 .setTitle("Permiso de Almacenamiento")
-                .setMessage("Se necesita tu permiso para poder guardar las fotos en el dispositivo.")
+                .setMessage("Se necesita tu permiso para poder guardar las fotos y videos en el dispositivo.")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @SuppressLint("NewApi")
                     @Override
@@ -266,22 +266,54 @@ public class MainActivity extends AppCompatActivity {
         //permissions es el arreglo de perimisos solicitados
         //grantResults devuelte entero de si se dio el permiso o no
 
-        if(requestCode == CAMERA_WRITE_PERMISSION){
-            //se debe iniciar la camara con foto
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+            if(requestCode == CAMERA_WRITE_PERMISSION){
                 capturar(PETICION_FOTO,MEDIA_FOTO);
+            }else if(requestCode == VIDEO_WRITE_PERMISSION){
+                capturar(PETICION_VIDEO, MEDIA_VIDEO);
             }
-        }else if(requestCode == VIDEO_WRITE_PERMISSION){
-            //iniciar video
-            capturar(PETICION_VIDEO,MEDIA_VIDEO);
         }
+
     }
 
     public void tomarVideo(View view) {
 
         Toast.makeText(this, "Ejecutando método tomarVideo sobre la version sdk "+Build.VERSION.SDK_INT, Toast.LENGTH_LONG).show();
 
-        capturar(PETICION_VIDEO,MEDIA_VIDEO);
+        String permisoStorage = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
+        //verificar la version de android para pedir permisos en tiempo de ejecucion
+        //para la version 23 marshmallow hay que pedir permisos en tiempo de ejecución
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+
+            Toast.makeText(this, "Necesito permisos!", Toast.LENGTH_SHORT).show();
+
+            //verificar si ya tiene permiso requerido en este caso el WRITE_EXTERNAL_STORAGE que se definió en el
+            //manifest
+            if(checkSelfPermission(permisoStorage) != PackageManager.PERMISSION_GRANTED){
+                //pedir el permiso
+
+                //verificar si ya se pidio el persimo antes para informa porque
+                //se necesita en caso de que se halla denegado previamente
+                if(shouldShowRequestPermissionRationale(permisoStorage)){
+                    mostrarExplicacion(PETICION_VIDEO,permisoStorage);
+                }else{
+                    //para pedir el permiso se solicita el array de strings de los permisos, con las constantes
+                    //definidas en Manifest.permission y un codigo para poderlo identificar definido por uno mismo
+                    requestPermissions(new String[]{permisoStorage}, VIDEO_WRITE_PERMISSION);
+                }
+
+            }else{
+                //ya tiene el permiso
+                capturar(PETICION_VIDEO,MEDIA_VIDEO);
+            }
+
+        }else{
+
+            capturar(PETICION_VIDEO,MEDIA_VIDEO);
+        }
     }
 
     public void capturar(int peticionArchivo, int tipoArchivo){
